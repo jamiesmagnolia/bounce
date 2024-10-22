@@ -72,7 +72,7 @@ class Ball:
             self.on_ground = True
           
         # Platform collision and bounce
-        for platform in platforms:
+        for platform in platforms: # only for top of platform
             if (
                 self.y + self.radius > platform.y  # Ball touches platform from above
                 and self.y - self.radius < platform.y + platform.height  # Stay within platform height
