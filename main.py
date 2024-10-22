@@ -11,11 +11,22 @@ WIDTH = 800
 HEIGHT = 600
 FPS = 60
 
+# COLORS
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+GREEN = (0, 255, 0)
+RED = (255, 0, 0)
+
 # Initialise game
 pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Bounce (2024)")
 clock = pygame.time.Clock()
+
+# Initialise pygame mixer for bg-music
+pygame.mixer.init()
+pygame.mixer.music.load("PitcherPerfectTheme.wav")
+pygame.mixer.music.play(-1) # loop music
 
 # Creating game objects.
 ball = Ball(400, 300, 20, (255, 0, 0))
@@ -29,6 +40,9 @@ platforms = pygame.sprite.Group()
 all_sprites.add(ball)
 platforms.add(platform1)
 
+# misc
+button_rect = pygame.Rect(700, 520, 50, 50)
+music_on = True
 
 # game loop
 running = True
@@ -38,6 +52,15 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
+        # mouse events
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if button_rect.collidepoint(event.pos):
+                if music_on: 
+                    pygame.mixer.music.pause()
+                else:
+                    pygame.mixer.music.unpause()
+                music_on = not music_on # toggle music state?
+
     all_sprites.update(platforms)
 
     screen.fill("gray")
@@ -45,7 +68,18 @@ while running:
     platforms.draw(screen)
     all_sprites.draw(screen)
 
+    # music button
+    button_color = GREEN if music_on else RED
+    pygame.draw.rect(screen, button_color, button_rect)
+
+     # Draw button text
+    # font = pygame.font.Font(None, 36)
+    # text = font.render("Music: On" if music_on else "Music: Off", True, BLACK)
+    # text_rect = text.get_rect(center=button_rect.center)
+    # screen.blit(text, text_rect)
+
     pygame.display.flip()
     clock.tick(FPS)
 
+pygame.mixer.music.stop()
 pygame.quit()
