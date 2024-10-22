@@ -37,7 +37,7 @@ class Ball:
         elif keys[pygame.K_RIGHT] or keys[pygame.K_d]:
             self.vel_x += self.acceleration   
 
-        # jump
+        # jump 
         if (keys[pygame.K_UP] or keys[pygame.K_w]) and self.on_ground:
             self.vel_y -= 10
             self.on_ground = False
