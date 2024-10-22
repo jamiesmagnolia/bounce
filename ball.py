@@ -65,11 +65,56 @@ class Ball(pygame.sprite.Sprite):
         if self.rect.bottom > 600:
             self.rect.bottom = 600
             self.vel_y *= -self.DAMPING_FACTOR
-            self.on_ground = True        
+            self.on_ground = True      
+
+        for platform in platforms:
+            if self.rect.colliderect(platform.rect):
+                self.handle_collision(platform=platform)  
           
         # Platform collision and bounce
-        collided_platform = pygame.sprite.spritecollideany(self, platforms)
-        if collided_platform:
-            self.rect.bottom = collided_platform.rect.top
-            self.vel_y *= -self.DAMPING_FACTOR
-            self.on_ground = True
+        # collided_platform = pygame.sprite.spritecollideany(self, platforms)
+        # if collided_platform:
+        #     if self.rect.colliderect(platform.rect):
+        #         self.handle_collision(platform)
+
+    def handle_collision(self, platform):
+
+        # positive dx = ball's center is to the right of platform's center
+        # negative dx = ball's center is to the left of platform's center
+        dx = self.rect.centerx - platform.rect.centerx # horizontal distance
+
+        # positive dy = ball's center is below platform's center
+        # negative dy = ball's center is above platform's center
+        dy = self.rect.centery - platform.rect.centery # vertical distance
+
+        # we're using abs because we're calculating the magnitude of the distance
+        # we're interested in the distance (how far) and not the direction
+        # if horizontal (dx) > vertical (dy) distance:
+        # the ball is more likely hitting the platform from the side
+        # if dy > dx: ball is likely hitting the platform from above or below
+        if abs(dx) > abs(dy):
+
+            if dx > 0:
+                self.rect.left = platform.rect.right
+
+                if self.vel_x < 0:
+                    self.vel_x = 0
+                # self.vel_x *= -self.DAMPING_FACTOR
+            else:
+                self.rect.right = platform.rect.left
+                if self.vel_x > 0:
+                    self.vel_x = 0
+                # self.vel_x *= -self.DAMPING_FACTOR
+
+        else:
+            
+            if dy > 0:
+                self.rect.top = platform.rect.bottom
+                if self.vel_y < 0:
+                    self.vel_y = 0
+            else:
+                self.rect.bottom = platform.rect.top
+
+                if self.vel_y > 0:
+                    self.vel_y *= -self.DAMPING_FACTOR
+                    self.on_ground = True
