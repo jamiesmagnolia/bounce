@@ -58,8 +58,8 @@ class Ball(pygame.sprite.Sprite):
         self.vel_x = max(min(self.vel_x, self.MAX_SPEED), -self.MAX_SPEED)
 
         # position updates based on velocities
-        self.x += self.vel_x
-        self.y += self.vel_y
+        self.rect.x += self.vel_x
+        self.rect.y += self.vel_y
 
         # screen floor collisions
         if self.rect.bottom > 600:
