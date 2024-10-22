@@ -1,34 +1,42 @@
 import pygame
 
 
-class Ball:
+class Ball(pygame.sprite.Sprite):
     """
     Ball class.
     """
 
     def __init__(self, x, y, radius, color):
-        self.x = x
-        self.y = y
-        self.radius = radius
-        self.color = color
-        self.vel_x = 0
-        self.vel_y = 0
+        """
+        Create ball object.
+        """
+        super().__init__() # initialise Sprite class
+
+        # image surface to draw on
+        # rect allows pygame to handle positioning and rendering
+        self.image = pygame.Surface((radius * 2, radius * 2), pygame.SRCALPHA)
+        pygame.draw.circle(self.image, color, (radius, radius), radius)
+        self.rect = self.image.get_rect(center=(x, y)) # use rect positioning
+
+        # CONSTANTS
         self.GRAVITY = 0.5
-        self.acceleration = 0.5
-        self.friction = 0.1
         self.MAX_SPEED = 2.5
-        self.on_ground = True
         self.DAMPING_FACTOR = 0.75
 
-    def draw(self, screen):
-        pygame.draw.circle(screen, self.color, (self.x, self.y), self.radius)
+        self.vel_x = 0
+        self.vel_y = 0
+        self.acceleration = 0.5
+        self.friction = 0.1
+        self.on_ground = True
 
     def update(self, platforms):
+        """
+        Updates ball's attributes (e.g. positions, velocity)
+        """
 
         # constant gravity applies to the ball
         self.vel_y += self.GRAVITY
 
-        
         keys = pygame.key.get_pressed()
         
         # horizontal movements
@@ -43,43 +51,70 @@ class Ball:
             self.on_ground = False
 
         # friction when no key is pressed
-        if not keys[pygame.K_LEFT] and not keys[pygame.K_RIGHT]:
-            if self.vel_x > 0:
-                self.vel_x -= self.friction # slowly slow down R
-                if self.vel_x < 0: # prevents reversing due to friction
-                    self.vel_x = 0
-            elif self.vel_x < 0:
-                self.vel_x += self.friction # slowly slow down L
-                if self.vel_x > 0:
-                    self.vel_x = 0  
+        if not keys[pygame.K_LEFT] or keys[pygame.K_a]:
+            self.vel_x *= (1 - self.friction)
         
-        # print(f"x: {self.x}, y: {self.y}")
-
-        # max speed cap
-        if self.vel_x > self.MAX_SPEED:
-            self.vel_x = self.MAX_SPEED
-        elif self.vel_x < -self.MAX_SPEED:
-            self.vel_x = -self.MAX_SPEED
+        # max cap on horizontal velocity
+        self.vel_x = max(min(self.vel_x, self.MAX_SPEED), -self.MAX_SPEED)
 
         # position updates based on velocities
-        self.x += self.vel_x
-        self.y += self.vel_y
+        self.rect.x += self.vel_x
+        self.rect.y += self.vel_y
 
-        # bounce effect
-        if self.y + self.radius > 600: # assume screen height = 600
-            self.y = 600 - self.radius # position = just touching the floor
-            self.vel_y *= -self.DAMPING_FACTOR # reverse velocity/bounce with damping?  
-            self.on_ground = True
+        # screen floor collisions
+        if self.rect.bottom > 600:
+            self.rect.bottom = 600
+            self.vel_y *= -self.DAMPING_FACTOR
+            self.on_ground = True      
+
+        for platform in platforms:
+            if self.rect.colliderect(platform.rect):
+                self.handle_collision(platform=platform)  
           
         # Platform collision and bounce
-        for platform in platforms: # only for top of platform
-            if (
-                self.y + self.radius > platform.y  # Ball touches platform from above
-                and self.y - self.radius < platform.y + platform.height  # Stay within platform height
-                and self.x > platform.x  # Within platform width
-                and self.x < platform.x + platform.width
-                and self.vel_y > 0  # Only if falling down
-            ):
-                self.y = platform.y - self.radius  # Adjust position to top of platform
-                self.vel_y *= -self.DAMPING_FACTOR  # Bounce with damping
-                self.on_ground = True
+        # collided_platform = pygame.sprite.spritecollideany(self, platforms)
+        # if collided_platform:
+        #     if self.rect.colliderect(platform.rect):
+        #         self.handle_collision(platform)
+
+    def handle_collision(self, platform):
+
+        # positive dx = ball's center is to the right of platform's center
+        # negative dx = ball's center is to the left of platform's center
+        dx = self.rect.centerx - platform.rect.centerx # horizontal distance
+
+        # positive dy = ball's center is below platform's center
+        # negative dy = ball's center is above platform's center
+        dy = self.rect.centery - platform.rect.centery # vertical distance
+
+        # we're using abs because we're calculating the magnitude of the distance
+        # we're interested in the distance (how far) and not the direction
+        # if horizontal (dx) > vertical (dy) distance:
+        # the ball is more likely hitting the platform from the side
+        # if dy > dx: ball is likely hitting the platform from above or below
+        if abs(dx) > abs(dy):
+
+            if dx > 0:
+                self.rect.left = platform.rect.right
+
+                if self.vel_x < 0:
+                    self.vel_x = 0
+                # self.vel_x *= -self.DAMPING_FACTOR
+            else:
+                self.rect.right = platform.rect.left
+                if self.vel_x > 0:
+                    self.vel_x = 0
+                # self.vel_x *= -self.DAMPING_FACTOR
+
+        else:
+            
+            if dy > 0:
+                self.rect.top = platform.rect.bottom
+                if self.vel_y < 0:
+                    self.vel_y = 0
+            else:
+                self.rect.bottom = platform.rect.top
+
+                if self.vel_y > 0:
+                    self.vel_y *= -self.DAMPING_FACTOR
+                    self.on_ground = True
