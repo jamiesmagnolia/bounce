@@ -81,21 +81,62 @@ class Ball(pygame.sprite.Sprite):
 
     def handle_collision(self, platform):
 
-        # collision with top of platform
-        if self.rect.bottom > platform.rect.top:
-            self.rect.bottom = platform.rect.top
-            self.vel_y *= -self.DAMPING_FACTOR
-            self.on_ground = True # consider a platform top a ground
+        dx = self.rect.centerx - platform.rect.centerx
+        dy = self.rect.centery - platform.rect.centery
 
-        # collision of the top of the ball with the bottom of the platform
-        if self.rect.top < platform.rect.bottom:
-            self.rect.top = platform.rect.bottom
-            self.vel_y *= self.DAMPING_FACTOR
+        
 
-        # collision of the right side of the ball with the left side of a platform
-        if self.rect.right > platform.rect.left:
-            self.rect.right = platform.rect.left
-            self.vel_x *= -self.DAMPING_FACTOR
+        # # vertical collisions
+        # # ball falls and lands on platform
+        # if self.vel_y > 0 and self.rect.bottom >= platform.rect.top: # 5 pixels tolerance due to rounding errors
+        #     self.rect.bottom = platform.rect.top
+        #     self.vel_y *= -self.DAMPING_FACTOR
+        #     self.on_ground = True
+
+        # # ball jumps and hits platform from bottom
+        # elif self.vel_y < 0 and self.rect.top <= platform.rect.bottom:
+        #     self.rect.top = platform.rect.bottom
+        #     self.vel_y *= -self.DAMPING_FACTOR
+
+        # # if abs(dy) > abs(dx):
+        # elif self.vel_x > 0 and self.rect.right >= platform.rect.left:
+        #     # Ball hits the left side of the platform
+        #     self.rect.right = platform.rect.left
+        #     self.vel_x = 0  # Reverse horizontal velocity
+
+        # elif self.vel_x < 0 and self.rect.left <= platform.rect.right:
+        #     # Ball hits the right side of the platform
+        #     self.rect.left = platform.rect.right
+        #     self.vel_x = 0  # Reverse horizontal velocity
+            
+        # else:
+        
+        # if self.vel_x > 0 and self.rect.right >= platform.rect.left:
+        #     self.rect.right = platform.rect.left
+        #     self.vel_x *= -self.DAMPING_FACTOR
+        #     # self.vel_x = 0
+
+        # elif self.vel_x > 0 and self.rect.left <= platform.rect.right:
+        #     self.rect.left = platform.rect.right
+        #     self.vel_x *= -self.DAMPING_FACTOR
+        #     # self.vel_x = 0
+
+        # attempt 2
+        # # collision with top of platform
+        # if self.rect.bottom > platform.rect.top:
+        #     self.rect.bottom = platform.rect.top
+        #     self.vel_y *= -self.DAMPING_FACTOR
+        #     self.on_ground = True # consider a platform top a ground
+
+        # # collision of the top of the ball with the bottom of the platform
+        # if self.rect.top < platform.rect.bottom:
+        #     self.rect.top = platform.rect.bottom
+        #     self.vel_y *= self.DAMPING_FACTOR
+
+        # # collision of the right side of the ball with the left side of a platform
+        # if self.rect.right > platform.rect.left:
+        #     self.rect.right = platform.rect.left
+        #     self.vel_x *= -self.DAMPING_FACTOR
 
 
         # # Calculate the difference in position between ball and platform
