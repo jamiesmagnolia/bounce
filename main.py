@@ -30,7 +30,8 @@ pygame.mixer.music.play(-1) # loop music
 
 # Creating game objects.
 ball = Ball(400, 300, 20, (255, 0, 0))
-platform1 = Platform(300, 300, 200, 40, "darkred")
+platform1 = Platform(100, 550, 200, 40, "darkred")
+platform2 = Platform(100, 300, 100, 200, "darkred")
 
 # Create sprite groups
 all_sprites = pygame.sprite.Group()
@@ -39,6 +40,7 @@ platforms = pygame.sprite.Group()
 # Add sprites to groups
 all_sprites.add(ball)
 platforms.add(platform1)
+platforms.add(platform2)
 
 # misc
 button_rect = pygame.Rect(700, 520, 50, 50)

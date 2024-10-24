@@ -4,6 +4,7 @@ import pygame
 class Ball(pygame.sprite.Sprite):
     """
     Ball class.
+    At the moment, player input is handled in this class as well. # TODO: refactor into separate input management
     """
 
     def __init__(self, x, y, radius, color):
@@ -23,6 +24,7 @@ class Ball(pygame.sprite.Sprite):
         self.MAX_SPEED = 2.5
         self.DAMPING_FACTOR = 0.75
 
+        self.radius = radius
         self.vel_x = 0
         self.vel_y = 0
         self.acceleration = 0.5
@@ -39,19 +41,19 @@ class Ball(pygame.sprite.Sprite):
 
         keys = pygame.key.get_pressed()
         
-        # horizontal movements
+        # horizontal movement management
         if keys[pygame.K_LEFT] or keys[pygame.K_a]:
             self.vel_x += -self.acceleration
         elif keys[pygame.K_RIGHT] or keys[pygame.K_d]:
             self.vel_x += self.acceleration   
 
         # jump 
-        if (keys[pygame.K_UP] or keys[pygame.K_w]) and self.on_ground:
+        if (keys[pygame.K_UP] or keys[pygame.K_w]) and (self.on_ground is True):
             self.vel_y -= 10
             self.on_ground = False
 
         # friction when no key is pressed
-        if not keys[pygame.K_LEFT] or keys[pygame.K_a]:
+        if not (keys[pygame.K_LEFT] or keys[pygame.K_a] or keys[pygame.K_RIGHT] or keys[pygame.K_d]):
             self.vel_x *= (1 - self.friction)
         
         # max cap on horizontal velocity
@@ -79,42 +81,84 @@ class Ball(pygame.sprite.Sprite):
 
     def handle_collision(self, platform):
 
-        # positive dx = ball's center is to the right of platform's center
-        # negative dx = ball's center is to the left of platform's center
-        dx = self.rect.centerx - platform.rect.centerx # horizontal distance
+        dx = self.rect.centerx - platform.rect.centerx
+        dy = self.rect.centery - platform.rect.centery
 
-        # positive dy = ball's center is below platform's center
-        # negative dy = ball's center is above platform's center
-        dy = self.rect.centery - platform.rect.centery # vertical distance
+        
 
-        # we're using abs because we're calculating the magnitude of the distance
-        # we're interested in the distance (how far) and not the direction
-        # if horizontal (dx) > vertical (dy) distance:
-        # the ball is more likely hitting the platform from the side
-        # if dy > dx: ball is likely hitting the platform from above or below
-        if abs(dx) > abs(dy):
+        # # vertical collisions
+        # # ball falls and lands on platform
+        # if self.vel_y > 0 and self.rect.bottom >= platform.rect.top: # 5 pixels tolerance due to rounding errors
+        #     self.rect.bottom = platform.rect.top
+        #     self.vel_y *= -self.DAMPING_FACTOR
+        #     self.on_ground = True
 
-            if dx > 0:
-                self.rect.left = platform.rect.right
+        # # ball jumps and hits platform from bottom
+        # elif self.vel_y < 0 and self.rect.top <= platform.rect.bottom:
+        #     self.rect.top = platform.rect.bottom
+        #     self.vel_y *= -self.DAMPING_FACTOR
 
-                if self.vel_x < 0:
-                    self.vel_x = 0
-                # self.vel_x *= -self.DAMPING_FACTOR
-            else:
-                self.rect.right = platform.rect.left
-                if self.vel_x > 0:
-                    self.vel_x = 0
-                # self.vel_x *= -self.DAMPING_FACTOR
+        # # if abs(dy) > abs(dx):
+        # elif self.vel_x > 0 and self.rect.right >= platform.rect.left:
+        #     # Ball hits the left side of the platform
+        #     self.rect.right = platform.rect.left
+        #     self.vel_x = 0  # Reverse horizontal velocity
 
-        else:
+        # elif self.vel_x < 0 and self.rect.left <= platform.rect.right:
+        #     # Ball hits the right side of the platform
+        #     self.rect.left = platform.rect.right
+        #     self.vel_x = 0  # Reverse horizontal velocity
             
-            if dy > 0:
-                self.rect.top = platform.rect.bottom
-                if self.vel_y < 0:
-                    self.vel_y = 0
-            else:
-                self.rect.bottom = platform.rect.top
+        # else:
+        
+        # if self.vel_x > 0 and self.rect.right >= platform.rect.left:
+        #     self.rect.right = platform.rect.left
+        #     self.vel_x *= -self.DAMPING_FACTOR
+        #     # self.vel_x = 0
 
-                if self.vel_y > 0:
-                    self.vel_y *= -self.DAMPING_FACTOR
-                    self.on_ground = True
+        # elif self.vel_x > 0 and self.rect.left <= platform.rect.right:
+        #     self.rect.left = platform.rect.right
+        #     self.vel_x *= -self.DAMPING_FACTOR
+        #     # self.vel_x = 0
+
+        # attempt 2
+        # # collision with top of platform
+        # if self.rect.bottom > platform.rect.top:
+        #     self.rect.bottom = platform.rect.top
+        #     self.vel_y *= -self.DAMPING_FACTOR
+        #     self.on_ground = True # consider a platform top a ground
+
+        # # collision of the top of the ball with the bottom of the platform
+        # if self.rect.top < platform.rect.bottom:
+        #     self.rect.top = platform.rect.bottom
+        #     self.vel_y *= self.DAMPING_FACTOR
+
+        # # collision of the right side of the ball with the left side of a platform
+        # if self.rect.right > platform.rect.left:
+        #     self.rect.right = platform.rect.left
+        #     self.vel_x *= -self.DAMPING_FACTOR
+
+
+        # # Calculate the difference in position between ball and platform
+        # dx = self.rect.centerx - platform.rect.centerx  # Horizontal distance
+        # dy = self.rect.centery - platform.rect.centery  # Vertical distance
+
+        # # If vertical collision (ball lands on platform from above)
+        # if abs(dy) < platform.rect.height / 2 + self.radius and self.vel_y > 0:
+        #     # Ensure the ball lands on the platform's top
+        #     self.rect.bottom = platform.rect.top
+        #     self.vel_y *= -self.DAMPING_FACTOR # bounce, slowdown, stop
+        #     self.on_ground = True  # Mark the ball as on the ground
+
+        # # Handle horizontal collisions if not landing
+        # elif abs(dx) < platform.rect.width / 2 + self.radius:
+        #     if dx > 0:  # Ball hits from the right
+        #         self.rect.left = platform.rect.right
+        #         if self.vel_x < 0:
+        #             self.vel_x *= -self.DAMPING_FACTOR
+        #     else:  # Ball hits from the left
+        #         self.rect.right = platform.rect.left
+        #         if self.vel_x > 0:
+        #             self.vel_x *= -self.DAMPING_FACTOR
+
+        pass
