@@ -27,6 +27,11 @@ Pymunk is a physics library (?). It quite literally helps visualise physics simu
     - Examples:
         1. Circle (specify radius)
         2. Segment (a line between 2 points **a** and **b**)
+            - Parameters:
+                - radius: 
+                    - Thickness of line
+                    - Why named radius? Because phys. engines like Pymunk think of lines as a line with rounded edges (a capsule-like shape)
+
         3. Polygon (define shape via **list of vertices**/location of vertices)
         4. Etc.
     - Elasticity: bounciness, springiness
