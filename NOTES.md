@@ -32,5 +32,7 @@ Because I forget things (unfortunately).
     - Shape handles geometry.
     - Body handles physics.
 
-
-
+- **Moment**: 
+    - Moment of inertia (or just moment).
+    - Measure of object's **resistance to rotational motion**.
+    - Determines how hard it is to rotate the object around its center.
