@@ -1,3 +1,4 @@
+import os
 import pyglet
 import pymunk
 import pymunk.pyglet_util
@@ -15,6 +16,13 @@ space.gravity = (0, -900) # TRY: change to (0, -500)
 # pymunk debug draw setup - to see physics objects
 draw_options = pymunk.pyglet_util.DrawOptions()
 
+# music
+music = pyglet.media.load('../assets/PitcherPerfectTheme.wav', streaming=False)
+music_player = pyglet.media.Player()
+music_player.queue(music)
+music_player.loop = True
+music_player.play()
+
 balls = []
 
 # create the floor -> a static body
@@ -25,11 +33,21 @@ def create_floor():
     space.add(body, shape)
 
 def create_walls():
-    body = pymunk.Body(body_type=pymunk.Body.STATIC)
-    shape = pymunk.Segment(body, )
+    # left wall
+    wallL_body = pymunk.Body(body_type=pymunk.Body.STATIC)
+    wallL_shape = pymunk.Segment(wallL_body, (0, 50), (0, HEIGHT), 5)
+    wallL_shape.elasticity = 0.8
+    space.add(wallL_body, wallL_shape)
 
-# function call - create floor
+    # right wall
+    wallR_body = pymunk.Body(body_type=pymunk.Body.STATIC)
+    wallR_shape = pymunk.Segment(wallR_body, (WIDTH, 50), (WIDTH, HEIGHT), 5)
+    wallR_shape.elasticity = 0.8
+    space.add(wallR_body, wallR_shape)
+
+# function calls - create floor, walls
 create_floor()
+create_walls()
 
 def create_ball(x, y, radius=20):
     mass = 1
@@ -43,9 +61,6 @@ def create_ball(x, y, radius=20):
     space.add(body, shape) # add ball to physics space
     balls.append((body, shape)) # store ball for tracking
 
-# def draw_circle(x, y, radius=20):
-#     circle = pyglet.shapes.Circle(x, y, radius, color=(255, 0, 0))
-#     balls.append(circle)
 
 # a mouse press will "spawn" or create a ball
 @window.event
