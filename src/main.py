@@ -24,6 +24,10 @@ def create_floor():
     shape.elasticity = 0.8
     space.add(body, shape)
 
+def create_walls():
+    body = pymunk.Body(body_type=pymunk.Body.STATIC)
+    shape = pymunk.Segment(body, )
+
 # function call - create floor
 create_floor()
 
