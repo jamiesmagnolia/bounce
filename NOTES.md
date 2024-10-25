@@ -2,6 +2,8 @@
 Because I forget things (unfortunately).
 
 ## Pymunk
+Pymunk is a physics library (?). It quite literally helps visualise physics simulation in python.
+
 - In pymunk, you can create **physics objects** by combining **bodies** and **shapes**.
     - Physics Object = Body + Shape
 
@@ -9,7 +11,10 @@ Because I forget things (unfortunately).
 - **Body**: representation of physical properties of an object.
     - Properties:
         1. Mass: how heavy
-        2. Position: location (x, y)
+        2. Position: location/coordinates (x, y)
+            - (0, 0) or origin is bottom left of window
+            - x-axis: increases from left->right
+            - y-axis: increases from down->up
         3. Velocity: how fast AND which direction it moves
 
     - **Think**: body as the container for the phys.-related data. It's **not** the actual shape. This is what Shape is for.
@@ -20,9 +25,9 @@ Because I forget things (unfortunately).
 
 - **Shape**: this defines the geometry (hence, name).
     - Examples:
-        1. Circle
-        2. Segment
-        3. Polygon
+        1. Circle (specify radius)
+        2. Segment (a line between 2 points **a** and **b**)
+        3. Polygon (define shape via **list of vertices**/location of vertices)
         4. Etc.
     - Elasticity: bounciness, springiness
     - Friction: how much resistance an object experience when sliding on surfaces (it's just like IRL physics...)
@@ -36,3 +41,5 @@ Because I forget things (unfortunately).
     - Moment of inertia (or just moment).
     - Measure of object's **resistance to rotational motion**.
     - Determines how hard it is to rotate the object around its center.
+
+## Pyglet
