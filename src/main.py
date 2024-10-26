@@ -2,6 +2,7 @@ import os
 import pyglet
 import pymunk
 import pymunk.pyglet_util
+from pyglet.window import key
 
 WIDTH = 800
 HEIGHT = 600
@@ -21,7 +22,7 @@ music = pyglet.media.load('../assets/PitcherPerfectTheme.wav', streaming=False)
 music_player = pyglet.media.Player()
 music_player.queue(music)
 music_player.loop = True
-music_player.play()
+# music_player.play()
 
 balls = []
 
@@ -30,6 +31,7 @@ def create_floor():
     body = pymunk.Body(body_type=pymunk.Body.STATIC)
     shape = pymunk.Segment(body, (0, 50), (WIDTH, 50), 5) # floor segment
     shape.elasticity = 0.8
+    shape.friction = 1.0
     space.add(body, shape)
 
 def create_walls():
@@ -49,23 +51,53 @@ def create_walls():
 create_floor()
 create_walls()
 
-def create_ball(x, y, radius=20):
+def create_player(): # where the player is a ball
+    global player_ball
     mass = 1
-    moment = pymunk.moment_for_circle(mass, 0, radius) # calculate moment of inertia
-    body = pymunk.Body(mass, moment) # create a dynamic body (affected by forces)
-    body.position = x, y # set starting position of the ball
+    radius = 20
+    moment = pymunk.moment_for_circle(mass, 0, radius)
+    body = pymunk.Body(mass, moment, body_type=pymunk.Body.DYNAMIC)
+    body.position = (400, 300)
 
-    shape = pymunk.Circle(body, radius=radius) # create a circular shape
-    shape.elasticity = 0.9 # elasticity = bouncy
+    shape = pymunk.Circle(body, radius)
+    shape.elasticity = 0.9
 
-    space.add(body, shape) # add ball to physics space
-    balls.append((body, shape)) # store ball for tracking
+    body.linear_damping = 0.1
+    body.angular_damping = 0.05
+
+    space.add(body, shape)
+    player_ball = body
+
+create_player()
+
+# controls
+keys = key.KeyStateHandler()
+window.push_handlers(keys)
+
+def update_player_ball(dt):
+    linear_force = 500 # force to apply to player's ball to move
+    torque = 500 # for rotation
+
+    if keys[key.LEFT]:
+        player_ball.apply_force_at_local_point((-linear_force, 0))
+        player_ball.torque += torque
+
+    if keys[key.RIGHT]:
+        player_ball.apply_force_at_local_point((linear_force, 0))
+        player_ball.torque -= torque
+
+    if keys[key.UP]:
+        # player_ball.apply_force_at_local_point((0, force))
+        player_ball.apply_impulse_at_local_point((0, 25))
+    
+    if keys[key.DOWN]:
+        player_ball.apply_force_at_local_point((0, -linear_force))
 
 
 # a mouse press will "spawn" or create a ball
-@window.event
-def on_mouse_press(x, y, button, modifiers):
-    create_ball(x, y)
+# @window.event
+# def on_mouse_press(x, y, button, modifiers):
+#     create_ball(x, y)
 
 # draw event -> think a "render" function that quite literally renders everything
 @window.event # decorator
@@ -75,8 +107,10 @@ def on_draw():
     # for ball in balls:
     #     ball.draw()
 
+# update physics
 def update(dt):
     space.step(dt) # step physics simulation forward by dt seconds
+    update_player_ball(dt)
 
 # schedule to update function to run at 60 FPS
 pyglet.clock.schedule_interval(update, 1/60.0)
