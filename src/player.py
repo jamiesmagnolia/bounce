@@ -1,16 +1,14 @@
 import pyglet
 import pymunk
 import pymunk.pyglet_util
-
+import typing
 
 class Player:
-    """
-    The ball.
-    """
 
-    def __init__(self, x, y, radius, space):
+    def __init__(self, space: pymunk.Space, x: int = 400, y: int = 300, radius: int = 20):
         """
-        Create a bouncy ball.
+        Create a bouncy ball object.
+        :space:
         """
         mass = 1
         moment = pymunk.moment_for_circle(mass=mass, inner_radius=0, outer_radius=radius)
@@ -25,14 +23,22 @@ class Player:
 
         space.add(self.body, self.shape)
 
-    def apply_force(self, force, offset=(0, 0)):
+    def apply_force(self, force: int, offset: Tuple[int, int] = (0, 0)) -> None:
         """Apply force to the player ball."""
         self.body.apply_force_at_local_point(force, offset)
 
-    def jump(self):
-        """Apply a jump impulse."""
-        self.body.apply_impulse_at_local_point((0, 3000))
+    def jump(self) -> None:
+        """
+        Apply a jump impulse.
+        
+        # TODO: Adjust jump to be more "burst" and less "continuous flying"
+        The jump action is supposedly "on impulse" (think: a burst of energy).
+        We don't want the ball to float and fly, or move in a general upwards motion 
+        if it's not touching the ground.
+        
+        """
+        self.body.apply_impulse_at_local_point((0, 250)) # 250 looks realistic-ish but 3000 just shoots it upwards.
 
-    def is_on_ground(self):
+    def is_on_ground(self) -> bool:
         """Check if the player is near the ground."""
         return self.body.position.y <= 70  # Adjust based on floor height
