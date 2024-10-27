@@ -76,19 +76,17 @@ window.push_handlers(keys)
 
 def update_player_ball(dt):
     linear_force = 500 # force to apply to player's ball to move
-    torque = 500 # for rotation
+    # force_point = (0, -10)
 
     if keys[key.LEFT]:
         player_ball.apply_force_at_local_point((-linear_force, 0))
-        player_ball.torque += torque
 
     if keys[key.RIGHT]:
         player_ball.apply_force_at_local_point((linear_force, 0))
-        player_ball.torque -= torque
 
     if keys[key.UP]:
         # player_ball.apply_force_at_local_point((0, force))
-        player_ball.apply_impulse_at_local_point((0, 25))
+        player_ball.apply_impulse_at_local_point((0, 75))
     
     if keys[key.DOWN]:
         player_ball.apply_force_at_local_point((0, -linear_force))
